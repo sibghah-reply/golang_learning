@@ -11,8 +11,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-//next: push code so far to github
-//maybe add a readme to github
 //read the article about the distributed crawler and potentially add more features to it
 
 type Crawler struct {
@@ -108,7 +106,9 @@ func (c *Crawler) addURLToVisit(u string) bool {
 
 // Crawl the provided URL concurrently
 // : This is a channel of type string, used for sending newly discovered URLs back to the main goroutine or another part of the program.
-func (c *Crawler) crawl(pageURL string) {
+func (c *Crawler) crawl(pageURL string, sem chan struct{}) {
+	sem <- struct{}{}        // Acquire the semaphore
+	defer func() { <-sem }() // Release the semaphore
 	c.wg.Add(1)
 	fmt.Println("added")
 	defer func() {
@@ -131,11 +131,14 @@ func (c *Crawler) crawl(pageURL string) {
 }
 
 func (c *Crawler) crawlAllURLs() {
+	const maxConcurrentGoroutines = 100
+	sem := make(chan struct{}, maxConcurrentGoroutines)
+
 	// Seed the queue with initial URLs
 	for _, seedURL := range c.seedUrls {
 		c.urlQueue = append(c.urlQueue, seedURL)
 
-		go c.crawl(seedURL)
+		go c.crawl(seedURL, sem)
 	}
 
 	go func() {
@@ -148,7 +151,7 @@ func (c *Crawler) crawlAllURLs() {
 	for url := range c.urlChan {
 		fmt.Println("Discovered:", url)
 
-		go c.crawl(url) // Crawl discovered URLs concurrently
+		go c.crawl(url, sem) // Crawl discovered URLs concurrently
 		// Wait for all crawlers to finish before closing the channel
 		go func() {
 			c.wg.Wait() // Wait for all crawling tasks to finish
@@ -162,6 +165,14 @@ func (c *Crawler) crawlAllURLs() {
 			c.mutex.Unlock()
 		}()
 	}
+
+	c.wg.Wait()
+	c.mutex.Lock()
+	if !c.stopped {
+		close(c.urlChan)
+		c.stopped = true
+	}
+	c.mutex.Unlock()
 
 }
 
