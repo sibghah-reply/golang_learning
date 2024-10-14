@@ -11,7 +11,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-//read the article about the distributed crawler and potentially add more features to it
+//todo: storing jobs in redis in json format
+//first set up a redis cluster - in own aws
+//decide what the jobs will be- will they be more urls to crawl
+// implement a depth limit
 
 type Crawler struct {
 	seedUrls    []string
@@ -177,6 +180,6 @@ func (c *Crawler) crawlAllURLs() {
 }
 
 func main() {
-	crawler := NewCrawler([]string{"https://stackoverflow.com/questions/70908948/channel-hangs-probably-not-closing-at-the-right-place"})
+	crawler := NewCrawler([]string{"https://amazon.com"})
 	crawler.crawlAllURLs()
 }
