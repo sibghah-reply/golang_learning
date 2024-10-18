@@ -179,7 +179,7 @@ func (c *Crawler) crawlAllURLs() {
 
 }
 
-func main() {
+func test1() {
 	crawler := NewCrawler([]string{"https://amazon.com"})
 	crawler.crawlAllURLs()
 }

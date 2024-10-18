@@ -1,0 +1,15 @@
+{
+    "Version": "2012-10-17",
+      "Statement": [
+        {
+    "Effect" : "Allow",
+          "Action" : [
+            "elasticache:Connect"
+          ],
+          "Resource" : [
+            "arn:aws:elasticache:eu-west-1:471112885356:serverlesscache:crawlerurlqueue",
+            "arn:aws:elasticache:eu-west-1:471112885356:user:root"
+          ]
+        }
+      ]
+}
